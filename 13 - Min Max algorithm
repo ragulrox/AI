@@ -1,0 +1,107 @@
+def evaluate(board):
+    for row in board:
+        if all(cell == "X" for cell in row):
+            return 10
+        elif all(cell == "O" for cell in row):
+            return -10
+
+    for col in range(3):
+        if all(board[row][col] == "X" for row in range(3)):
+            return 10
+        elif all(board[row][col] == "O" for row in range(3)):
+            return -10
+
+    if all(board[i][i] == "X" for i in range(3)) or all(board[i][2 - i] == "X" for i in range(3)):
+        return 10
+    if all(board[i][i] == "O" for i in range(3)) or all(board[i][2 - i] == "O" for i in range(3)):
+        return -10
+
+    return 0
+
+def is_full(board):
+    return all(cell != " " for row in board for cell in row)
+
+def minimax(board, depth, is_max):
+    score = evaluate(board)
+
+    if score == 10:
+        return score - depth
+    if score == -10:
+        return score + depth
+    if is_full(board):
+        return 0
+
+    if is_max:
+        best = -float("inf")
+        for i in range(3):
+            for j in range(3):
+                if board[i][j] == " ":
+                    board[i][j] = "X"
+                    best = max(best, minimax(board, depth + 1, not is_max))
+                    board[i][j] = " "
+        return best
+    else:
+        best = float("inf")
+        for i in range(3):
+            for j in range(3):
+                if board[i][j] == " ":
+                    board[i][j] = "O"
+                    best = min(best, minimax(board, depth + 1, not is_max))
+                    board[i][j] = " "
+        return best
+
+def find_best_move(board):
+    best_val = -float("inf")
+    best_move = (-1, -1)
+
+    for i in range(3):
+        for j in range(3):
+            if board[i][j] == " ":
+                board[i][j] = "X"
+                move_val = minimax(board, 0, False)
+                board[i][j] = " "
+                if move_val > best_val:
+                    best_move = (i, j)
+                    best_val = move_val
+
+    return best_move
+
+def print_board(board):
+    for row in board:
+        print(" | ".join(row))
+        print("-" * 9)
+
+def main():
+    board = [[" " for _ in range(3)] for _ in range(3)]
+    current_player = "X"
+
+    while True:
+        print_board(board)
+
+        if current_player == "X":
+            row, col = find_best_move(board)
+            print(f"Player {current_player} chooses row {row} and column {col}.")
+        else:
+            while True:
+                row = int(input(f"Player {current_player}, enter row (0-2): "))
+                col = int(input(f"Player {current_player}, enter column (0-2): "))
+                if board[row][col] == " ":
+                    break
+                else:
+                    print("Cell is already occupied. Try again.")
+
+        board[row][col] = current_player
+
+        if evaluate(board) == 10:
+            print_board(board)
+            print(f"Player {current_player} wins!")
+            break
+        elif is_full(board):
+            print_board(board)
+            print("It's a draw!")
+            break
+
+        current_player = "O" if current_player == "X" else "X"
+
+if __name__ == "__main__":
+    main()

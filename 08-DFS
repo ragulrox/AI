@@ -1,0 +1,39 @@
+def dfs(graph, node, visited, goal, path=[]):
+    visited[node] = True
+    path.append(node)
+
+    if node == goal:
+        return path
+
+    for neighbor in graph[node]:
+        if not visited[neighbor]:
+            new_path = dfs(graph, neighbor, visited, goal, path.copy())
+            if new_path:
+                return new_path
+
+    return None
+
+def main():
+    graph = {}
+    num_edges = int(input("Enter the number of edges in the graph: "))
+    for _ in range(num_edges):
+        source, target = input("Enter edge (source target): ").split()
+        if source not in graph:
+            graph[source] = []
+        graph[source].append(target)
+
+    start_node = input("Enter the start node: ")
+    goal_node = input("Enter the goal node: ")
+
+    if start_node in graph and goal_node in graph:
+        visited = {node: False for node in graph}
+        solution_path = dfs(graph, start_node, visited, goal_node)
+        if solution_path:
+            print("Path found:", " -> ".join(solution_path))
+        else:
+            print("No path found.")
+    else:
+        print("Invalid node names.")
+
+if _name_ == "_main_":
+    main()

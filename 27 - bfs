@@ -1,0 +1,58 @@
+% Define the graph as edges
+edge(a, b, 4).
+edge(a, c, 5).
+edge(b, d, 7).
+edge(c, d, 6).
+edge(c, e, 8).
+edge(d, e, 9).
+edge(d, f, 5).
+edge(e, f, 6).
+
+% Heuristic values for the nodes (used in Best-First Search)
+heuristic(b, 8).
+heuristic(c, 5).
+heuristic(d, 6).
+heuristic(e, 4).
+heuristic(f, 2).
+
+% Best-First Search implementation
+best_first_search(Start, Goal, Path) :-
+    best_first_search([path([Start], 0, Heuristic)], Goal, [], Path).
+
+% Base case: Goal node is found
+best_first_search([path([Goal | Rest], Cost, _Heuristic) | _], Goal, _, [Goal | Rest]).
+
+% Recursive case: Expand the current node
+best_first_search([path([Current | Rest], Cost, Heuristic) | Paths], Goal, Visited, Path) :-
+    findall(
+        path([Next, Current | Rest], NewCost, NextHeuristic),
+        (   edge(Current, Next, StepCost),
+            \+ member(Next, [Current | Rest]),
+            NewCost is Cost + StepCost,
+            heuristic(Next, NextHeuristic)
+        ),
+        NewPaths
+    ),
+    append(Paths, NewPaths, UpdatedPaths),
+    sort_paths(UpdatedPaths, SortedPaths),
+    select_best_path(SortedPaths, BestPath),
+    BestPath = path([Next | _], _, _),
+    best_first_search([BestPath | Paths], Goal, [Current | Visited], Path).
+
+% Sort paths based on heuristic
+sort_paths(Paths, SortedPaths) :-
+    predsort(compare_path, Paths, SortedPaths).
+
+% Comparison function for sorting paths
+compare_path(Order, path(, Cost1, Heuristic1), path(, Cost2, Heuristic2)) :-
+    Evaluation1 is Cost1 + Heuristic1,
+    Evaluation2 is Cost2 + Heuristic2,
+    compare(Order, Evaluation1, Evaluation2).
+
+% Select the best path from sorted paths
+select_best_path([Path | _], Path).
+
+% Example usage
+% best_first_search(a, f, Path),
+%  writeln("Best-First Search Path:"),
+%  writeln(Path).
