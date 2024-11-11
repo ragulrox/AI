@@ -1,0 +1,43 @@
+from collections import deque
+
+def bfs(graph, start, goal):
+    visited = set()
+    queue = deque([(start, [start])])  # Queue of nodes with their path
+
+    while queue:
+        current_node, current_path = queue.popleft()
+        visited.add(current_node)
+
+        if current_node == goal:
+            return current_path
+
+        for neighbor in graph[current_node]:
+            if neighbor not in visited:
+                new_path = current_path + [neighbor]
+                queue.append((neighbor, new_path))
+
+    return None
+
+def main():
+    graph = {}
+    num_edges = int(input("Enter the number of edges in the graph: "))
+    for _ in range(num_edges):
+        source, target = input("Enter edge (source target): ").split()
+        if source not in graph:
+            graph[source] = []
+        graph[source].append(target)
+
+    start_node = input("Enter the start node: ")
+    goal_node = input("Enter the goal node: ")
+
+    if start_node in graph and goal_node in graph:
+        solution_path = bfs(graph, start_node, goal_node)
+        if solution_path:
+            print("Shortest path:", " -> ".join(solution_path))
+        else:
+            print("No path found.")
+    else:
+        print("Invalid node names.")
+
+if _name_ == "_main_":
+    main()
